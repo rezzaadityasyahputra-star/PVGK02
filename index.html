@@ -13,10 +13,10 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    /* ==========================================
-       1. VARIABLES & RESET
-       ========================================== */
     :root {
       --primary: #00AA5B;
       --primary-hover: #008F4C;
@@ -53,19 +53,6 @@
       line-height: 1.5;
     }
 
-    /* Remove outline on click for non-keyboard focus */
-    button:focus, input:focus {
-      outline: none;
-    }
-
-    button:focus-visible, input:focus-visible {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
-    }
-
-    /* ==========================================
-       2. HEADER & NAVIGATION
-       ========================================== */
     header {
       background-color: var(--bg-surface);
       border-bottom: 1px solid var(--border-color);
@@ -90,11 +77,6 @@
       gap: 12px;
       text-decoration: none;
       color: var(--text-main);
-      transition: var(--transition);
-    }
-
-    .brand:hover {
-      opacity: 0.9;
     }
 
     .brand img {
@@ -108,39 +90,9 @@
     .brand span {
       font-size: 1.25rem;
       font-weight: 800;
-      letter-spacing: -0.5px;
       color: var(--primary);
     }
 
-    .profile-btn {
-      background: var(--bg-page);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: var(--transition);
-    }
-
-    .profile-btn:hover {
-      background: var(--primary-light);
-      color: var(--primary);
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .profile-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* ==========================================
-       3. MAIN CONTENT & HERO GRID
-       ========================================== */
     main {
       flex: 1;
       max-width: 1200px;
@@ -150,36 +102,50 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .hero-grid {
       width: 100%;
       max-width: 760px;
       margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
 
     .thumb-card {
       width: 100%;
-      aspect-ratio: 16 / 9;
       background-color: var(--bg-surface);
       border-radius: var(--radius-lg);
       overflow: hidden;
       border: 1px solid var(--border-color);
       position: relative;
       box-shadow: var(--shadow-md);
-      transition: var(--transition);
-      user-select: none;
+      display: flex;
+      flex-direction: column;
     }
 
-    .thumb-card:hover {
-      border-color: rgba(0, 170, 91, 0.4);
-      box-shadow: var(--shadow-lg);
+    .grid-number-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      z-index: 10;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .thumb-image-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-page);
     }
 
     .thumb-card img {
@@ -187,16 +153,89 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 0.4s ease;
     }
 
-    .thumb-card:hover img {
-      transform: scale(1.015);
+    .card-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    /* ==========================================
-       4. SEPARATOR LINE
-       ========================================== */
+    .card-caption {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .links-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg-page);
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .download-btn {
+      width: 100%;
+      padding: 10px 18px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+    }
+
+    .download-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .timer-spinner-container {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner-svg {
+      animation: rotate 1.5s linear infinite;
+      width: 100%;
+      height: 100%;
+    }
+
+    .spinner-svg circle {
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 3.5;
+    }
+
+    .spinner-svg circle.path {
+      stroke: #FFFFFF;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 60;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    .countdown-number {
+      position: absolute;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
     .separator-container {
       width: 100%;
       max-width: 760px;
@@ -218,223 +257,8 @@
       color: var(--text-muted);
       letter-spacing: 1.2px;
       text-transform: uppercase;
-      white-space: nowrap;
     }
 
-    /* ==========================================
-       5. MODAL SYSTEM & AUTH
-       ========================================== */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 20, 18, 0.45);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: var(--transition);
-      padding: 20px;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 420px;
-      padding: 32px;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      transform: scale(0.95) translateY(10px);
-      transition: var(--transition);
-    }
-
-    .modal-overlay.active .modal-box {
-      transform: scale(1) translateY(0);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .auth-tabs {
-      display: flex;
-      gap: 16px;
-      border-bottom: 2px solid var(--border-color);
-      width: 100%;
-      margin-bottom: 24px;
-    }
-
-    .auth-tab {
-      background: none;
-      border: none;
-      padding: 8px 4px 12px 4px;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-      position: relative;
-      transition: var(--transition);
-    }
-
-    .auth-tab.active {
-      color: var(--primary);
-    }
-
-    .auth-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: var(--primary);
-      border-radius: 2px;
-    }
-
-    .close-btn {
-      background: var(--bg-page);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: var(--transition);
-      position: absolute;
-      top: 24px;
-      right: 24px;
-    }
-
-    .close-btn:hover {
-      background: #E8ECE9;
-      color: var(--text-main);
-    }
-
-    /* FORM CONTROLS */
-    .auth-form {
-      display: none;
-    }
-
-    .auth-form.active {
-      display: block;
-      animation: fadeIn 0.25s ease-out;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-      position: relative;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .input-wrapper i.input-icon {
-      position: absolute;
-      left: 14px;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      pointer-events: none;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 12px 40px 12px 42px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-main);
-      font-size: 0.95rem;
-      transition: var(--transition);
-    }
-
-    .form-control::placeholder {
-      color: #A0A8A2;
-    }
-
-    .form-control:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(0, 170, 91, 0.12);
-    }
-
-    .toggle-password {
-      position: absolute;
-      right: 14px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.95rem;
-      padding: 0;
-      transition: var(--transition);
-    }
-
-    .toggle-password:hover {
-      color: var(--text-main);
-    }
-
-    /* BUTTONS */
-    .submit-btn {
-      width: 100%;
-      padding: 13px;
-      background: var(--primary);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #FFFFFF;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 24px;
-      box-shadow: 0 4px 12px rgba(0, 170, 91, 0.2);
-      transition: var(--transition);
-    }
-
-    .submit-btn:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0, 170, 91, 0.28);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
-    /* ==========================================
-       6. TOAST NOTIFICATIONS
-       ========================================== */
     .toast-container {
       position: fixed;
       bottom: 24px;
@@ -456,77 +280,42 @@
       align-items: center;
       gap: 12px;
       box-shadow: var(--shadow-lg);
-      min-width: 280px;
       font-size: 0.9rem;
       font-weight: 600;
       animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
     }
 
-    .toast i {
-      color: var(--primary);
-      font-size: 1.1rem;
-    }
+    .toast i { color: var(--primary); }
 
     @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
 
     @keyframes fadeOut {
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 480px) {
-      .modal-box {
-        padding: 24px 20px;
-      }
-      .toast-container {
-        left: 20px;
-        right: 20px;
-        bottom: 20px;
-      }
-      .toast {
-        min-width: auto;
-        width: 100%;
-      }
+      to { transform: translateX(100%); opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="header-container">
       <a href="#" class="brand">
         <img src="pvgk.png" alt="PVGK Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/36/00AA5B/FFFFFF?text=P';">
         <span>PVGK</span>
       </a>
-      <button class="profile-btn" id="openModalBtn" aria-label="Menu Akun">
-        <i class="fa-solid fa-user"></i>
-      </button>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
   <main>
-    <!-- SINGLE HERO GRID (NO CLICK EVENT / DECORATIVE ONLY) -->
-    <div class="hero-grid">
-      <div class="thumb-card">
-        <img src="pvgk01.png" alt="PVGK Media Thumbnail" onerror="this.onerror=null; this.src='https://picsum.photos/1280/720';">
+    <div class="hero-grid" id="gridContainer">
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+        <p style="margin-top: 10px; font-weight: 600;">Memuat konten video...</p>
       </div>
     </div>
 
-    <!-- SEPARATOR LINE -->
     <div class="separator-container">
       <div class="separator-line"></div>
       <span class="separator-text">list video</span>
@@ -534,173 +323,129 @@
     </div>
   </main>
 
-  <!-- AUTHENTICATION MODAL (LOGIN & REGISTER) -->
-  <div class="modal-overlay" id="authModal">
-    <div class="modal-box">
-      <button class="close-btn" id="closeModalBtn" aria-label="Tutup Modal">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <!-- TAB NAVIGATION -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tabLoginBtn">Masuk</button>
-        <button class="auth-tab" id="tabRegisterBtn">Daftar</button>
-      </div>
-
-      <!-- FORM LOGIN -->
-      <form class="auth-form active" id="loginForm">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" class="form-control" placeholder="nama@email.com" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Kata Sandi</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" class="form-control password-field" placeholder="Masukkan kata sandi" required>
-            <button type="button" class="toggle-password" aria-label="Tampilkan kata sandi">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-        </div>
-        <button type="submit" class="submit-btn">
-          <i class="fa-solid fa-right-to-bracket"></i> Masuk
-        </button>
-      </form>
-
-      <!-- FORM REGISTER -->
-      <form class="auth-form" id="regForm">
-        <div class="form-group">
-          <label class="form-label">Nama Lengkap</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-user input-icon"></i>
-            <input type="text" class="form-control" placeholder="Nama lengkap Anda" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" class="form-control" placeholder="nama@email.com" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Kata Sandi</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" class="form-control password-field" placeholder="Buat kata sandi aman" required>
-            <button type="button" class="toggle-password" aria-label="Tampilkan kata sandi">
-              <i class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-        </div>
-        <button type="submit" class="submit-btn">
-          <i class="fa-solid fa-user-plus"></i> Buat Akun
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    // DOM Elements
-    const openModalBtn = document.getElementById('openModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const authModal = document.getElementById('authModal');
-    
-    const tabLoginBtn = document.getElementById('tabLoginBtn');
-    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-    const loginForm = document.getElementById('loginForm');
-    const regForm = document.getElementById('regForm');
+    const SUPABASE_URL = 'https://xnbntgxciqvhfzalazeb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const gridContainer = document.getElementById('gridContainer');
     const toastContainer = document.getElementById('toastContainer');
 
-    // Open & Close Modal
-    openModalBtn.addEventListener('click', () => {
-      authModal.classList.add('active');
-    });
+    async function loadUserGrids() {
+      const { data: grids, error } = await supabase
+        .from('grids')
+        .select('*')
+        .order('created_at', { ascending: true });
 
-    closeModalBtn.addEventListener('click', () => {
-      authModal.classList.remove('active');
-    });
-
-    authModal.addEventListener('click', (e) => {
-      if (e.target === authModal) {
-        authModal.classList.remove('active');
+      if (error || !grids || grids.length === 0) {
+        gridContainer.innerHTML = `
+          <div class="thumb-card">
+            <div class="thumb-image-wrapper">
+              <img src="pvgk01.png" alt="Default Thumbnail" onerror="this.src='https://picsum.photos/1280/720'">
+            </div>
+            <div class="card-content">
+              <p class="card-caption">Belum ada konten video tersedia saat ini.</p>
+            </div>
+          </div>
+        `;
+        return;
       }
-    });
 
-    // Tab Switching Logic
-    tabLoginBtn.addEventListener('click', () => {
-      tabLoginBtn.classList.add('active');
-      tabRegisterBtn.classList.remove('active');
-      loginForm.classList.add('active');
-      regForm.classList.remove('active');
-    });
+      gridContainer.innerHTML = '';
+      grids.forEach((grid, index) => {
+        const gridNumber = index + 1;
+        let extraLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
 
-    tabRegisterBtn.addEventListener('click', () => {
-      tabRegisterBtn.classList.add('active');
-      tabLoginBtn.classList.remove('active');
-      regForm.classList.add('active');
-      loginForm.classList.remove('active');
-    });
+        let linksHtml = `
+          <div class="link-item">
+            <button class="download-btn" onclick="handleDownload(this, '${escapeHtml(grid.target_url)}')">
+              <i class="fa-solid fa-download"></i> Download Link Utama
+            </button>
+          </div>
+        `;
 
-    // Toggle Password Visibility
-    document.querySelectorAll('.toggle-password').forEach(button => {
-      button.addEventListener('click', function() {
-        const input = this.previousElementSibling;
-        const icon = this.querySelector('i');
-        
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        } else {
-          input.type = 'password';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        }
+        extraLinks.forEach((link, lIndex) => {
+          linksHtml += `
+            <div class="link-item" style="margin-top: 8px;">
+              <button class="download-btn" onclick="handleDownload(this, '${escapeHtml(link.url)}')">
+                <i class="fa-solid fa-link"></i> ${escapeHtml(link.label || 'Link ' + (lIndex + 2))}
+              </button>
+            </div>
+          `;
+        });
+
+        const card = document.createElement('div');
+        card.className = 'thumb-card';
+        card.innerHTML = `
+          <div class="grid-number-badge">Grid #${gridNumber}</div>
+          <div class="thumb-image-wrapper">
+            <img src="${escapeHtml(grid.thumbnail_url)}" alt="Thumbnail Grid #${gridNumber}" onerror="this.src='https://picsum.photos/1280/720'">
+          </div>
+          <div class="card-content">
+            ${grid.caption ? `<p class="card-caption">${escapeHtml(grid.caption)}</p>` : ''}
+            <div class="links-section">
+              ${linksHtml}
+            </div>
+          </div>
+        `;
+        gridContainer.appendChild(card);
       });
-    });
+    }
 
-    // Form Submissions
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      authModal.classList.remove('active');
-      loginForm.reset();
-      showToast('Berhasil masuk ke akun Anda', 'fa-circle-check');
-    });
+    function handleDownload(btnElement, targetUrl) {
+      btnElement.disabled = true;
+      showToast('Kamu akan membuat link dulu, harap tunggu...', 'fa-circle-info');
 
-    regForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      authModal.classList.remove('active');
-      regForm.reset();
-      showToast('Pendaftaran akun berhasil!', 'fa-circle-check');
-    });
+      setTimeout(() => {
+        let countdown = 15;
+        const originalContent = btnElement.innerHTML;
+        
+        btnElement.innerHTML = `
+          <div class="timer-spinner-container">
+            <svg class="spinner-svg" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none"></circle>
+              <circle cx="18" cy="18" r="14" fill="none" class="path"></circle>
+            </svg>
+            <span class="countdown-number" id="countdown-val">${countdown}</span>
+          </div>
+        `;
 
-    // Custom Toast System
+        const countdownValEl = btnElement.querySelector('#countdown-val');
+        const interval = setInterval(() => {
+          countdown--;
+          if (countdownValEl) countdownValEl.textContent = countdown;
+
+          if (countdown <= 0) {
+            clearInterval(interval);
+            showToast('Mengarahkan ke link tujuan...', 'fa-circle-check');
+            setTimeout(() => {
+              window.open(targetUrl, '_blank');
+              btnElement.disabled = false;
+              btnElement.innerHTML = originalContent;
+            }, 500);
+          }
+        }, 1000);
+      }, 3000);
+    }
+
     function showToast(message, iconClass = 'fa-circle-info') {
       const toast = document.createElement('div');
       toast.className = 'toast';
-      toast.innerHTML = `
-        <i class="fa-solid ${iconClass}"></i>
-        <span>${message}</span>
-      `;
-
+      toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
       toastContainer.appendChild(toast);
-
       setTimeout(() => {
         toast.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
+        setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUserGrids);
   </script>
 </body>
 </html>
