@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PVGK — Professional Video Showcase</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ==========================================
+       1. VARIABLES & RESET
+       ========================================== */
+    :root {
+      --primary: #00AA5B;
+      --primary-hover: #008F4C;
+      --primary-light: #E6F7EF;
+      --bg-page: #F7F9F8;
+      --bg-surface: #FFFFFF;
+      --text-main: #202522;
+      --text-muted: #747D77;
+      --border-color: #E7ECE8;
+      --border-focus: #00AA5B;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Remove outline on click for non-keyboard focus */
+    button:focus, input:focus {
+      outline: none;
+    }
+
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================
+       2. HEADER & NAVIGATION
+       ========================================== */
+    header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: var(--transition);
+    }
+
+    .brand:hover {
+      opacity: 0.9;
+    }
+
+    .brand img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      background: var(--bg-page);
+    }
+
+    .brand span {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    .profile-btn {
+      background: var(--bg-page);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .profile-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .profile-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* ==========================================
+       3. MAIN CONTENT & HERO GRID
+       ========================================== */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-grid {
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 24px;
+    }
+
+    .thumb-card {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .thumb-card:hover {
+      border-color: rgba(0, 170, 91, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .thumb-card:hover img {
+      transform: scale(1.015);
+    }
+
+    /* ==========================================
+       4. SEPARATOR LINE
+       ========================================== */
+    .separator-container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      margin: 16px 0 32px 0;
+    }
+
+    .separator-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .separator-text {
+      padding: 0 18px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ==========================================
+       5. MODAL SYSTEM & AUTH
+       ========================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 20, 18, 0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      transform: scale(0.95) translateY(10px);
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 16px;
+      border-bottom: 2px solid var(--border-color);
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      background: none;
+      border: none;
+      padding: 8px 4px 12px 4px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .auth-tab.active {
+      color: var(--primary);
+    }
+
+    .auth-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+      border-radius: 2px;
+    }
+
+    .close-btn {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      position: absolute;
+      top: 24px;
+      right: 24px;
+    }
+
+    .close-btn:hover {
+      background: #E8ECE9;
+      color: var(--text-main);
+    }
+
+    /* FORM CONTROLS */
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i.input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 40px 12px 42px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+
+    .form-control::placeholder {
+      color: #A0A8A2;
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0, 170, 91, 0.12);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0;
+      transition: var(--transition);
+    }
+
+    .toggle-password:hover {
+      color: var(--text-main);
+    }
+
+    /* BUTTONS */
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      box-shadow: 0 4px 12px rgba(0, 170, 91, 0.2);
+      transition: var(--transition);
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 170, 91, 0.28);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ==========================================
+       6. TOAST NOTIFICATIONS
+       ========================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      color: var(--text-main);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      min-width: 280px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    .toast i {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .modal-box {
+        padding: 24px 20px;
+      }
+      .toast-container {
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+      }
+      .toast {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <img src="pvgk.png" alt="PVGK Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/36/00AA5B/FFFFFF?text=P';">
+        <span>PVGK</span>
+      </a>
+      <button class="profile-btn" id="openModalBtn" aria-label="Menu Akun">
+        <i class="fa-solid fa-user"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- SINGLE HERO GRID (NO CLICK EVENT / DECORATIVE ONLY) -->
+    <div class="hero-grid">
+      <div class="thumb-card">
+        <img src="pvgk01.png" alt="PVGK Media Thumbnail" onerror="this.onerror=null; this.src='https://picsum.photos/1280/720';">
+      </div>
+    </div>
+
+    <!-- SEPARATOR LINE -->
+    <div class="separator-container">
+      <div class="separator-line"></div>
+      <span class="separator-text">list video</span>
+      <div class="separator-line"></div>
+    </div>
+  </main>
+
+  <!-- AUTHENTICATION MODAL (LOGIN & REGISTER) -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeModalBtn" aria-label="Tutup Modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- TAB NAVIGATION -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLoginBtn">Masuk</button>
+        <button class="auth-tab" id="tabRegisterBtn">Daftar</button>
+      </div>
+
+      <!-- FORM LOGIN -->
+      <form class="auth-form active" id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" class="form-control" placeholder="nama@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" class="form-control password-field" placeholder="Masukkan kata sandi" required>
+            <button type="button" class="toggle-password" aria-label="Tampilkan kata sandi">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk
+        </button>
+      </form>
+
+      <!-- FORM REGISTER -->
+      <form class="auth-form" id="regForm">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" class="form-control" placeholder="Nama lengkap Anda" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" class="form-control" placeholder="nama@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" class="form-control password-field" placeholder="Buat kata sandi aman" required>
+            <button type="button" class="toggle-password" aria-label="Tampilkan kata sandi">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fa-solid fa-user-plus"></i> Buat Akun
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // DOM Elements
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const authModal = document.getElementById('authModal');
+    
+    const tabLoginBtn = document.getElementById('tabLoginBtn');
+    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+    const loginForm = document.getElementById('loginForm');
+    const regForm = document.getElementById('regForm');
+    const toastContainer = document.getElementById('toastContainer');
+
+    // Open & Close Modal
+    openModalBtn.addEventListener('click', () => {
+      authModal.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      authModal.classList.remove('active');
+    });
+
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) {
+        authModal.classList.remove('active');
+      }
+    });
+
+    // Tab Switching Logic
+    tabLoginBtn.addEventListener('click', () => {
+      tabLoginBtn.classList.add('active');
+      tabRegisterBtn.classList.remove('active');
+      loginForm.classList.add('active');
+      regForm.classList.remove('active');
+    });
+
+    tabRegisterBtn.addEventListener('click', () => {
+      tabRegisterBtn.classList.add('active');
+      tabLoginBtn.classList.remove('active');
+      regForm.classList.add('active');
+      loginForm.classList.remove('active');
+    });
+
+    // Toggle Password Visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const icon = this.querySelector('i');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+
+    // Form Submissions
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      authModal.classList.remove('active');
+      loginForm.reset();
+      showToast('Berhasil masuk ke akun Anda', 'fa-circle-check');
+    });
+
+    regForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      authModal.classList.remove('active');
+      regForm.reset();
+      showToast('Pendaftaran akun berhasil!', 'fa-circle-check');
+    });
+
+    // Custom Toast System
+    function showToast(message, iconClass = 'fa-circle-info') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <i class="fa-solid ${iconClass}"></i>
+        <span>${message}</span>
+      `;
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
