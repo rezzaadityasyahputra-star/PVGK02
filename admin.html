@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PVGK — Admin Dashboard & Showcase</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ==========================================
+       1. VARIABLES & RESET
+       ========================================== */
+    :root {
+      --primary: #00AA5B;
+      --primary-hover: #008F4C;
+      --primary-light: #E6F7EF;
+      --bg-page: #F7F9F8;
+      --bg-surface: #FFFFFF;
+      --text-main: #202522;
+      --text-muted: #747D77;
+      --border-color: #E7ECE8;
+      --border-focus: #00AA5B;
+      --danger: #E53935;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    button:focus, input:focus {
+      outline: none;
+    }
+
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================
+       2. HEADER & NAVIGATION
+       ========================================== */
+    header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: var(--transition);
+    }
+
+    .brand img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      background: var(--bg-page);
+    }
+
+    .brand span {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .add-grid-btn {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.875rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(0, 170, 91, 0.2);
+    }
+
+    .add-grid-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ==========================================
+       3. MAIN CONTENT & GRID CONTAINER
+       ========================================== */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-grid {
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .thumb-card {
+      width: 100%;
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-number-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      z-index: 10;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .thumb-image-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-page);
+    }
+
+    .thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .thumb-card:hover img {
+      transform: scale(1.015);
+    }
+
+    .card-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-caption {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .links-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg-page);
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .links-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* DOWNLOAD BUTTON & SPINNER */
+    .download-btn {
+      flex: 1;
+      padding: 10px 18px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      min-height: 42px;
+      box-shadow: 0 2px 8px rgba(0, 170, 91, 0.15);
+    }
+
+    .download-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .download-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.95;
+    }
+
+    .btn-delete-link {
+      background: #FCE8E6;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-delete-link:hover {
+      background: var(--danger);
+      color: #FFFFFF;
+    }
+
+    .timer-spinner-container {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner-svg {
+      animation: rotate 1.5s linear infinite;
+      width: 100%;
+      height: 100%;
+    }
+
+    .spinner-svg circle {
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 3.5;
+    }
+
+    .spinner-svg circle.path {
+      stroke: #FFFFFF;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 60;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    .countdown-number {
+      position: absolute;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    /* ADMIN CONTROLS */
+    .admin-controls-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+    }
+
+    .btn-control {
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-control:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-control.btn-danger-alt {
+      background: #FCE8E6;
+      color: var(--danger);
+      border-color: #F8C4C0;
+    }
+
+    .btn-control.btn-danger-alt:hover {
+      background: var(--danger);
+      color: #FFFFFF;
+    }
+
+    /* SEPARATOR */
+    .separator-container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      margin: 16px 0 32px 0;
+    }
+
+    .separator-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .separator-text {
+      padding: 0 18px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* MODAL SYSTEM */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 20, 18, 0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      transform: scale(0.95) translateY(10px);
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1) translateY(0);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 16px;
+      border-bottom: 2px solid var(--border-color);
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      background: none;
+      border: none;
+      padding: 8px 4px 12px 4px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+      position: relative;
+    }
+
+    .auth-tab::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+      border-radius: 2px;
+    }
+
+    .close-btn {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      position: absolute;
+      top: 24px;
+      right: 24px;
+    }
+
+    .close-btn:hover {
+      background: #E8ECE9;
+      color: var(--text-main);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i.input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0, 170, 91, 0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      transition: var(--transition);
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      color: var(--text-main);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      min-width: 280px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    .toast i {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .modal-box { padding: 24px 20px; }
+      .toast-container { left: 20px; right: 20px; bottom: 20px; }
+      .toast { width: 100%; min-width: auto; }
+      .admin-controls-panel { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <img src="pvgk.png" alt="PVGK Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/36/00AA5B/FFFFFF?text=P';">
+        <span>PVGK</span>
+      </a>
+      <div class="header-actions">
+        <div class="admin-badge">
+          <i class="fa-solid fa-user-gear"></i> Admin
+        </div>
+        <button class="add-grid-btn" id="openModalBtn">
+          <i class="fa-solid fa-plus"></i> New Grid
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- HERO GRID CONTAINER FROM SUPABASE -->
+    <div class="hero-grid" id="gridContainer">
+      <!-- Loading State -->
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+        <p style="margin-top: 10px; font-weight: 600;">Memuat data grid...</p>
+      </div>
+    </div>
+
+    <!-- SEPARATOR LINE -->
+    <div class="separator-container">
+      <div class="separator-line"></div>
+      <span class="separator-text">list video</span>
+      <div class="separator-line"></div>
+    </div>
+  </main>
+
+  <!-- ADMIN MODAL (NEW GRID) -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeModalBtn" aria-label="Tutup Modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="auth-tabs">
+        <span class="auth-tab">Buat New Grid</span>
+      </div>
+
+      <!-- FORM NEW GRID -->
+      <form id="addGridForm">
+        <div class="form-group">
+          <label class="form-label">Add Image Thumbnail (URL)</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-image input-icon"></i>
+            <input type="url" class="form-control" id="inputThumbnail" placeholder="https://domain.com/pvgk01.png" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Add Link Utama (Download Link)</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-link input-icon"></i>
+            <input type="url" class="form-control" id="inputTargetUrl" placeholder="https://link-tujuan.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Caption / Deskripsi</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-align-left input-icon"></i>
+            <input type="text" class="form-control" id="inputCaption" placeholder="Tulis caption di sini...">
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fa-solid fa-plus"></i> Buat New Grid
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 1. SUPABASE CLIENT INITIALIZATION
+    const SUPABASE_URL = 'https://xnbntgxciqvhfzalazeb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // DOM Elements
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const adminModal = document.getElementById('adminModal');
+    const addGridForm = document.getElementById('addGridForm');
+    const gridContainer = document.getElementById('gridContainer');
+    const toastContainer = document.getElementById('toastContainer');
+
+    // Modal Events
+    openModalBtn.addEventListener('click', () => adminModal.classList.add('active'));
+    closeModalBtn.addEventListener('click', () => adminModal.classList.remove('active'));
+    adminModal.addEventListener('click', (e) => {
+      if (e.target === adminModal) adminModal.classList.remove('active');
+    });
+
+    // 2. FETCH AND DISPLAY GRIDS FROM SUPABASE
+    async function loadGrids() {
+      const { data: grids, error } = await supabase
+        .from('grids')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        showToast('Gagal memuat data dari Supabase!', 'fa-circle-exclamation');
+        console.error(error);
+        return;
+      }
+
+      if (!grids || grids.length === 0) {
+        gridContainer.innerHTML = `
+          <div class="thumb-card">
+            <div class="thumb-image-wrapper">
+              <img src="pvgk01.png" alt="Default Thumbnail" onerror="this.src='https://picsum.photos/1280/720'">
+            </div>
+            <div class="card-content">
+              <p class="card-caption">Belum ada grid. Klik tombol "New Grid" di kanan atas untuk membuat Grid Nomor 1.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      gridContainer.innerHTML = '';
+      grids.forEach((grid, index) => {
+        const gridNumber = index + 1;
+        
+        // Memastikan extra_links berupa array
+        let extraLinks = [];
+        if (Array.isArray(grid.extra_links)) {
+          extraLinks = grid.extra_links;
+        } else if (typeof grid.extra_links === 'string') {
+          try { extraLinks = JSON.parse(grid.extra_links); } catch(e) { extraLinks = []; }
+        }
+
+        // Render HTML Card Grid
+        const card = document.createElement('div');
+        card.className = 'thumb-card';
+        
+        let linksHtml = `
+          <div class="link-item">
+            <button class="download-btn" onclick="handleDownload(this, '${escapeHtml(grid.target_url)}')">
+              <i class="fa-solid fa-download"></i> Download Link Utama
+            </button>
+          </div>
+        `;
+
+        extraLinks.forEach((link, lIndex) => {
+          linksHtml += `
+            <div class="link-item">
+              <button class="download-btn" onclick="handleDownload(this, '${escapeHtml(link.url)}')">
+                <i class="fa-solid fa-link"></i> ${escapeHtml(link.label || 'Link ' + (lIndex + 2))}
+              </button>
+
+              <button class="btn-delete-link" onclick="deleteExtraLink('${grid.id}', ${lIndex}, ${gridNumber})" title="Delete Link">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="grid-number-badge">Grid #${gridNumber}</div>
+          <div class="thumb-image-wrapper">
+            <img src="${escapeHtml(grid.thumbnail_url)}" alt="Thumbnail" onerror="this.src='https://picsum.photos/1280/720'">
+          </div>
+          <div class="card-content">
+            ${grid.caption ? `<p class="card-caption">${escapeHtml(grid.caption)}</p>` : ''}
+            
+            <div class="links-section">
+              <div class="links-header">Daftar Link pada Grid Nomor ${gridNumber}:</div>
+              ${linksHtml}
+            </div>
+
+            <!-- ACTION CONTROLS SESUAI REVISI -->
+            <div class="admin-controls-panel">
+              <button class="btn-control" onclick="addExtraLink('${grid.id}', ${gridNumber})">
+                <i class="fa-solid fa-plus"></i> Add Link
+              </button>
+
+              <button class="btn-control" onclick="gantiThumbnail('${grid.id}', '${escapeHtml(grid.thumbnail_url)}', ${gridNumber})">
+                <i class="fa-solid fa-image"></i> Ganti Thumbnail
+              </button>
+
+              <button class="btn-control" onclick="gantiCaption('${grid.id}', '${escapeHtml(grid.caption || '')}', ${gridNumber})">
+                <i class="fa-solid fa-pen"></i> Ganti Capt
+              </button>
+
+              <button class="btn-control" onclick="gantiLinkUtama('${grid.id}', '${escapeHtml(grid.target_url)}', ${gridNumber})">
+                <i class="fa-solid fa-link"></i> Ganti Link Utama
+              </button>
+
+              <button class="btn-control btn-danger-alt" onclick="deleteGrid('${grid.id}', ${gridNumber})">
+                <i class="fa-solid fa-trash"></i> Delete Grid #${gridNumber}
+              </button>
+            </div>
+
+          </div>
+        `;
+        gridContainer.appendChild(card);
+      });
+    }
+
+    // 3. GENERATOR DOWNLOAD LINK WITH TIMER & LOADING
+    function handleDownload(btnElement, targetUrl) {
+      btnElement.disabled = true;
+
+      showToast('Kamu akan membuat link dulu, harap tunggu...', 'fa-circle-info');
+
+      setTimeout(() => {
+        let countdown = 15;
+        const originalContent = btnElement.innerHTML;
+        
+        btnElement.innerHTML = `
+          <div class="timer-spinner-container">
+            <svg class="spinner-svg" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none"></circle>
+              <circle cx="18" cy="18" r="14" fill="none" class="path"></circle>
+            </svg>
+            <span class="countdown-number" id="countdown-val">${countdown}</span>
+          </div>
+        `;
+
+        const countdownValEl = btnElement.querySelector('#countdown-val');
+
+        const interval = setInterval(() => {
+          countdown--;
+          if (countdownValEl) countdownValEl.textContent = countdown;
+
+          if (countdown <= 0) {
+            clearInterval(interval);
+            showToast('Mengarahkan ke link tujuan...', 'fa-circle-check');
+            
+            setTimeout(() => {
+              window.open(targetUrl, '_blank');
+              btnElement.disabled = false;
+              btnElement.innerHTML = originalContent;
+            }, 500);
+          }
+        }, 1000);
+
+      }, 3000);
+    }
+
+    // 4. ADD NEW GRID
+    addGridForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const thumb = document.getElementById('inputThumbnail').value;
+      const target = document.getElementById('inputTargetUrl').value;
+      const caption = document.getElementById('inputCaption').value;
+
+      const { error } = await supabase
+        .from('grids')
+        .insert([{ 
+          thumbnail_url: thumb, 
+          target_url: target, 
+          caption: caption,
+          extra_links: [] 
+        }]);
+
+      if (error) {
+        showToast('Gagal membuat grid baru!', 'fa-triangle-exclamation');
+        console.error(error);
+      } else {
+        showToast('New Grid berhasil dibuat!', 'fa-circle-check');
+        addGridForm.reset();
+        adminModal.classList.remove('active');
+        loadGrids();
+      }
+    });
+
+    // 5. FITUR REVISI KHUSUS BERDASARKAN NOMOR GRID
+
+    // A. Add Link ke Grid tertentu
+    async function addExtraLink(gridId, gridNumber) {
+      const label = prompt(`[Grid #${gridNumber}] Masukkan Label/Nama Link:`, "Download Alternative");
+      if (!label) return;
+
+      const url = prompt(`[Grid #${gridNumber}] Masukkan URL Link Baru:`);
+      if (!url) return;
+
+      const { data: grid, error: fetchErr } = await supabase
+        .from('grids')
+        .select('extra_links')
+        .eq('id', gridId)
+        .single();
+
+      if (fetchErr) {
+        showToast('Gagal mengambil data grid!', 'fa-triangle-exclamation');
+        return;
+      }
+
+      let currentLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
+      currentLinks.push({ label, url });
+
+      const { error } = await supabase
+        .from('grids')
+        .update({ extra_links: currentLinks })
+        .eq('id', gridId);
+
+      if (error) {
+        showToast('Gagal menambah link!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Link berhasil ditambahkan ke Grid #${gridNumber}!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // B. Delete Link spesifik pada Grid tertentu
+    async function deleteExtraLink(gridId, linkIndex, gridNumber) {
+      if (!confirm(`Hapus link ini dari Grid #${gridNumber}?`)) return;
+
+      const { data: grid, error: fetchErr } = await supabase
+        .from('grids')
+        .select('extra_links')
+        .eq('id', gridId)
+        .single();
+
+      if (fetchErr) return;
+
+      let currentLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
+      currentLinks.splice(linkIndex, 1);
+
+      const { error } = await supabase
+        .from('grids')
+        .update({ extra_links: currentLinks })
+        .eq('id', gridId);
+
+      if (error) {
+        showToast('Gagal menghapus link!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Link dihapus dari Grid #${gridNumber}!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // C. Ganti Thumbnail pada Grid tertentu
+    async function gantiThumbnail(gridId, oldThumb, gridNumber) {
+      const newThumb = prompt(`[Grid #${gridNumber}] Masukkan URL Thumbnail Image baru:`, oldThumb);
+      if (newThumb === null || newThumb.trim() === "") return;
+
+      const { error } = await supabase
+        .from('grids')
+        .update({ thumbnail_url: newThumb })
+        .eq('id', gridId);
+
+      if (error) {
+        showToast('Gagal mengganti thumbnail!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Thumbnail Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // D. Ganti Caption pada Grid tertentu
+    async function gantiCaption(gridId, oldCaption, gridNumber) {
+      const newCaption = prompt(`[Grid #${gridNumber}] Masukkan Caption baru:`, oldCaption);
+      if (newCaption === null) return;
+
+      const { error } = await supabase
+        .from('grids')
+        .update({ caption: newCaption })
+        .eq('id', gridId);
+
+      if (error) {
+        showToast('Gagal mengganti caption!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Caption Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // E. Ganti Link Utama pada Grid tertentu
+    async function gantiLinkUtama(gridId, oldTarget, gridNumber) {
+      const newTarget = prompt(`[Grid #${gridNumber}] Masukkan Link Utama baru:`, oldTarget);
+      if (newTarget === null || newTarget.trim() === "") return;
+
+      const { error } = await supabase
+        .from('grids')
+        .update({ target_url: newTarget })
+        .eq('id', gridId);
+
+      if (error) {
+        showToast('Gagal mengganti link utama!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Link Utama Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // F. Delete Grid pada nomor tertentu
+    async function deleteGrid(gridId, gridNumber) {
+      if (!confirm(`Yakin ingin menghapus seluruh data pada Grid #${gridNumber}?`)) return;
+
+      const { error } = await supabase
+        .from('grids')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        showToast('Gagal menghapus grid!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Grid #${gridNumber} berhasil dihapus!`, 'fa-circle-check');
+        loadGrids();
+      }
+    }
+
+    // TOAST SYSTEM
+    function showToast(message, iconClass = 'fa-circle-info') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <i class="fa-solid ${iconClass}"></i>
+        <span>${message}</span>
+      `;
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // HELPER
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // INITIAL LOAD
+    document.addEventListener('DOMContentLoaded', loadGrids);
+  </script>
+</body>
+</html>
