@@ -266,7 +266,6 @@
       gap: 8px;
     }
 
-    /* DOWNLOAD BUTTON & SPINNER */
     .download-btn {
       flex: 1;
       padding: 10px 18px;
@@ -352,7 +351,6 @@
       color: #FFFFFF;
     }
 
-    /* ADMIN CONTROLS */
     .admin-controls-panel {
       display: flex;
       flex-wrap: wrap;
@@ -638,7 +636,10 @@
         <div class="admin-badge">
           <i class="fa-solid fa-user-gear"></i> Admin
         </div>
-        <button class="add-grid-btn" id="openModalBtn">
+        <button class="add-grid-btn" id="openAuthModalBtn">
+          <i class="fa-solid fa-user-lock"></i> Login Admin
+        </button>
+        <button class="add-grid-btn" id="openModalBtn" style="display: none;">
           <i class="fa-solid fa-plus"></i> New Grid
         </button>
       </div>
@@ -647,16 +648,13 @@
 
   <!-- MAIN CONTENT -->
   <main>
-    <!-- HERO GRID CONTAINER FROM SUPABASE -->
     <div class="hero-grid" id="gridContainer">
-      <!-- Loading State -->
       <div style="text-align: center; padding: 40px; color: var(--text-muted);">
         <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
         <p style="margin-top: 10px; font-weight: 600;">Memuat data grid...</p>
       </div>
     </div>
 
-    <!-- SEPARATOR LINE -->
     <div class="separator-container">
       <div class="separator-line"></div>
       <span class="separator-text">list video</span>
@@ -664,10 +662,41 @@
     </div>
   </main>
 
+  <!-- MODAL LOGIN ADMIN -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeAuthModalBtn">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="auth-tabs">
+        <span class="auth-tab">Login Admin</span>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" class="form-control" id="loginUsername" placeholder="Username admin..." required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" class="form-control" id="loginPassword" placeholder="Password admin..." required>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk Admin
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- ADMIN MODAL (NEW GRID) -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal-box">
-      <button class="close-btn" id="closeModalBtn" aria-label="Tutup Modal">
+      <button class="close-btn" id="closeModalBtn">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
@@ -675,7 +704,6 @@
         <span class="auth-tab">Buat New Grid</span>
       </div>
 
-      <!-- FORM NEW GRID -->
       <form id="addGridForm">
         <div class="form-group">
           <label class="form-label">Add Image Thumbnail (URL)</label>
@@ -710,12 +738,15 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // 1. SUPABASE CLIENT INITIALIZATION
     const SUPABASE_URL = 'https://xnbntgxciqvhfzalazeb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // DOM Elements
+    const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+    const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
+    const authModal = document.getElementById('authModal');
+    const loginForm = document.getElementById('loginForm');
+
     const openModalBtn = document.getElementById('openModalBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const adminModal = document.getElementById('adminModal');
@@ -723,14 +754,48 @@
     const gridContainer = document.getElementById('gridContainer');
     const toastContainer = document.getElementById('toastContainer');
 
-    // Modal Events
+    // Cek Sesi Login Admin
+    function checkAdminSession() {
+      const isLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+      if (isLoggedIn) {
+        openAuthModalBtn.style.display = 'none';
+        openModalBtn.style.display = 'flex';
+      } else {
+        openAuthModalBtn.style.display = 'flex';
+        openModalBtn.style.display = 'none';
+      }
+    }
+
+    openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
+    closeAuthModalBtn.addEventListener('click', () => authModal.classList.remove('active'));
+
     openModalBtn.addEventListener('click', () => adminModal.classList.add('active'));
     closeModalBtn.addEventListener('click', () => adminModal.classList.remove('active'));
-    adminModal.addEventListener('click', (e) => {
-      if (e.target === adminModal) adminModal.classList.remove('active');
+
+    // Authentikasi Admin (User: bangkev / Pw: bangkevmin)
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value;
+      const p = document.getElementById('loginPassword').value;
+
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('username', u)
+        .eq('password', p)
+        .single();
+
+      if (error || !admin) {
+        showToast('Username atau Password Admin salah!', 'fa-triangle-exclamation');
+      } else {
+        showToast(`Selamat datang, Admin ${admin.username}!`, 'fa-circle-check');
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        authModal.classList.remove('active');
+        checkAdminSession();
+        loadGrids();
+      }
     });
 
-    // 2. FETCH AND DISPLAY GRIDS FROM SUPABASE
     async function loadGrids() {
       const { data: grids, error } = await supabase
         .from('grids')
@@ -739,7 +804,6 @@
 
       if (error) {
         showToast('Gagal memuat data dari Supabase!', 'fa-circle-exclamation');
-        console.error(error);
         return;
       }
 
@@ -750,26 +814,20 @@
               <img src="pvgk01.png" alt="Default Thumbnail" onerror="this.src='https://picsum.photos/1280/720'">
             </div>
             <div class="card-content">
-              <p class="card-caption">Belum ada grid. Klik tombol "New Grid" di kanan atas untuk membuat Grid Nomor 1.</p>
+              <p class="card-caption">Belum ada grid. Silakan Login Admin lalu klik "New Grid".</p>
             </div>
           </div>
         `;
         return;
       }
 
+      const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
       gridContainer.innerHTML = '';
+
       grids.forEach((grid, index) => {
         const gridNumber = index + 1;
-        
-        // Memastikan extra_links berupa array
-        let extraLinks = [];
-        if (Array.isArray(grid.extra_links)) {
-          extraLinks = grid.extra_links;
-        } else if (typeof grid.extra_links === 'string') {
-          try { extraLinks = JSON.parse(grid.extra_links); } catch(e) { extraLinks = []; }
-        }
+        let extraLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
 
-        // Render HTML Card Grid
         const card = document.createElement('div');
         card.className = 'thumb-card';
         
@@ -787,13 +845,37 @@
               <button class="download-btn" onclick="handleDownload(this, '${escapeHtml(link.url)}')">
                 <i class="fa-solid fa-link"></i> ${escapeHtml(link.label || 'Link ' + (lIndex + 2))}
               </button>
-
-              <button class="btn-delete-link" onclick="deleteExtraLink('${grid.id}', ${lIndex}, ${gridNumber})" title="Delete Link">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
+              ${isAdmin ? `
+                <button class="btn-delete-link" onclick="deleteExtraLink('${grid.id}', ${lIndex},${gridNumber})" title="Delete Link">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              ` : ''}
             </div>
           `;
         });
+
+        let adminControlsHtml = '';
+        if (isAdmin) {
+          adminControlsHtml = `
+            <div class="admin-controls-panel">
+              <button class="btn-control" onclick="addExtraLink('${grid.id}', ${gridNumber})">
+                <i class="fa-solid fa-plus"></i> Add Link
+              </button>
+              <button class="btn-control" onclick="gantiThumbnail('${grid.id}', '${escapeHtml(grid.thumbnail_url)}', ${gridNumber})">
+                <i class="fa-solid fa-image"></i> Ganti Thumbnail
+              </button>
+              <button class="btn-control" onclick="gantiCaption('${grid.id}', '${escapeHtml(grid.caption || '')}', ${gridNumber})">
+                <i class="fa-solid fa-pen"></i> Ganti Capt
+              </button>
+              <button class="btn-control" onclick="gantiLinkUtama('${grid.id}', '${escapeHtml(grid.target_url)}', ${gridNumber})">
+                <i class="fa-solid fa-link"></i> Ganti Link Utama
+              </button>
+              <button class="btn-control btn-danger-alt" onclick="deleteGrid('${grid.id}', ${gridNumber})">
+                <i class="fa-solid fa-trash"></i> Delete Grid #${gridNumber}
+              </button>
+            </div>
+          `;
+        }
 
         card.innerHTML = `
           <div class="grid-number-badge">Grid #${gridNumber}</div>
@@ -802,45 +884,19 @@
           </div>
           <div class="card-content">
             ${grid.caption ? `<p class="card-caption">${escapeHtml(grid.caption)}</p>` : ''}
-            
             <div class="links-section">
               <div class="links-header">Daftar Link pada Grid Nomor ${gridNumber}:</div>
               ${linksHtml}
             </div>
-
-            <!-- ACTION CONTROLS SESUAI REVISI -->
-            <div class="admin-controls-panel">
-              <button class="btn-control" onclick="addExtraLink('${grid.id}', ${gridNumber})">
-                <i class="fa-solid fa-plus"></i> Add Link
-              </button>
-
-              <button class="btn-control" onclick="gantiThumbnail('${grid.id}', '${escapeHtml(grid.thumbnail_url)}', ${gridNumber})">
-                <i class="fa-solid fa-image"></i> Ganti Thumbnail
-              </button>
-
-              <button class="btn-control" onclick="gantiCaption('${grid.id}', '${escapeHtml(grid.caption || '')}', ${gridNumber})">
-                <i class="fa-solid fa-pen"></i> Ganti Capt
-              </button>
-
-              <button class="btn-control" onclick="gantiLinkUtama('${grid.id}', '${escapeHtml(grid.target_url)}', ${gridNumber})">
-                <i class="fa-solid fa-link"></i> Ganti Link Utama
-              </button>
-
-              <button class="btn-control btn-danger-alt" onclick="deleteGrid('${grid.id}', ${gridNumber})">
-                <i class="fa-solid fa-trash"></i> Delete Grid #${gridNumber}
-              </button>
-            </div>
-
+            ${adminControlsHtml}
           </div>
         `;
         gridContainer.appendChild(card);
       });
     }
 
-    // 3. GENERATOR DOWNLOAD LINK WITH TIMER & LOADING
     function handleDownload(btnElement, targetUrl) {
       btnElement.disabled = true;
-
       showToast('Kamu akan membuat link dulu, harap tunggu...', 'fa-circle-info');
 
       setTimeout(() => {
@@ -858,7 +914,6 @@
         `;
 
         const countdownValEl = btnElement.querySelector('#countdown-val');
-
         const interval = setInterval(() => {
           countdown--;
           if (countdownValEl) countdownValEl.textContent = countdown;
@@ -866,7 +921,6 @@
           if (countdown <= 0) {
             clearInterval(interval);
             showToast('Mengarahkan ke link tujuan...', 'fa-circle-check');
-            
             setTimeout(() => {
               window.open(targetUrl, '_blank');
               btnElement.disabled = false;
@@ -874,11 +928,9 @@
             }, 500);
           }
         }, 1000);
-
       }, 3000);
     }
 
-    // 4. ADD NEW GRID
     addGridForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const thumb = document.getElementById('inputThumbnail').value;
@@ -887,16 +939,10 @@
 
       const { error } = await supabase
         .from('grids')
-        .insert([{ 
-          thumbnail_url: thumb, 
-          target_url: target, 
-          caption: caption,
-          extra_links: [] 
-        }]);
+        .insert([{ thumbnail_url: thumb, target_url: target, caption: caption, extra_links: [] }]);
 
       if (error) {
         showToast('Gagal membuat grid baru!', 'fa-triangle-exclamation');
-        console.error(error);
       } else {
         showToast('New Grid berhasil dibuat!', 'fa-circle-check');
         addGridForm.reset();
@@ -905,168 +951,82 @@
       }
     });
 
-    // 5. FITUR REVISI KHUSUS BERDASARKAN NOMOR GRID
-
-    // A. Add Link ke Grid tertentu
     async function addExtraLink(gridId, gridNumber) {
-      const label = prompt(`[Grid #${gridNumber}] Masukkan Label/Nama Link:`, "Download Alternative");
+      const label = prompt(`[Grid #${gridNumber}] Masukkan Label Link:`, "Download Alternative");
       if (!label) return;
-
       const url = prompt(`[Grid #${gridNumber}] Masukkan URL Link Baru:`);
       if (!url) return;
 
-      const { data: grid, error: fetchErr } = await supabase
-        .from('grids')
-        .select('extra_links')
-        .eq('id', gridId)
-        .single();
-
-      if (fetchErr) {
-        showToast('Gagal mengambil data grid!', 'fa-triangle-exclamation');
-        return;
-      }
-
+      const { data: grid } = await supabase.from('grids').select('extra_links').eq('id', gridId).single();
       let currentLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
       currentLinks.push({ label, url });
 
-      const { error } = await supabase
-        .from('grids')
-        .update({ extra_links: currentLinks })
-        .eq('id', gridId);
-
-      if (error) {
-        showToast('Gagal menambah link!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Link berhasil ditambahkan ke Grid #${gridNumber}!`, 'fa-circle-check');
-        loadGrids();
-      }
+      await supabase.from('grids').update({ extra_links: currentLinks }).eq('id', gridId);
+      showToast(`Link ditambahkan ke Grid #${gridNumber}!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // B. Delete Link spesifik pada Grid tertentu
     async function deleteExtraLink(gridId, linkIndex, gridNumber) {
-      if (!confirm(`Hapus link ini dari Grid #${gridNumber}?`)) return;
-
-      const { data: grid, error: fetchErr } = await supabase
-        .from('grids')
-        .select('extra_links')
-        .eq('id', gridId)
-        .single();
-
-      if (fetchErr) return;
-
+      if (!confirm(`Hapus link dari Grid #${gridNumber}?`)) return;
+      const { data: grid } = await supabase.from('grids').select('extra_links').eq('id', gridId).single();
       let currentLinks = Array.isArray(grid.extra_links) ? grid.extra_links : [];
       currentLinks.splice(linkIndex, 1);
 
-      const { error } = await supabase
-        .from('grids')
-        .update({ extra_links: currentLinks })
-        .eq('id', gridId);
-
-      if (error) {
-        showToast('Gagal menghapus link!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Link dihapus dari Grid #${gridNumber}!`, 'fa-circle-check');
-        loadGrids();
-      }
+      await supabase.from('grids').update({ extra_links: currentLinks }).eq('id', gridId);
+      showToast(`Link dihapus dari Grid #${gridNumber}!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // C. Ganti Thumbnail pada Grid tertentu
     async function gantiThumbnail(gridId, oldThumb, gridNumber) {
-      const newThumb = prompt(`[Grid #${gridNumber}] Masukkan URL Thumbnail Image baru:`, oldThumb);
-      if (newThumb === null || newThumb.trim() === "") return;
-
-      const { error } = await supabase
-        .from('grids')
-        .update({ thumbnail_url: newThumb })
-        .eq('id', gridId);
-
-      if (error) {
-        showToast('Gagal mengganti thumbnail!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Thumbnail Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
-        loadGrids();
-      }
+      const newThumb = prompt(`[Grid #${gridNumber}] URL Thumbnail baru:`, oldThumb);
+      if (!newThumb) return;
+      await supabase.from('grids').update({ thumbnail_url: newThumb }).eq('id', gridId);
+      showToast(`Thumbnail Grid #${gridNumber} diganti!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // D. Ganti Caption pada Grid tertentu
     async function gantiCaption(gridId, oldCaption, gridNumber) {
-      const newCaption = prompt(`[Grid #${gridNumber}] Masukkan Caption baru:`, oldCaption);
+      const newCaption = prompt(`[Grid #${gridNumber}] Caption baru:`, oldCaption);
       if (newCaption === null) return;
-
-      const { error } = await supabase
-        .from('grids')
-        .update({ caption: newCaption })
-        .eq('id', gridId);
-
-      if (error) {
-        showToast('Gagal mengganti caption!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Caption Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
-        loadGrids();
-      }
+      await supabase.from('grids').update({ caption: newCaption }).eq('id', gridId);
+      showToast(`Caption Grid #${gridNumber} diganti!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // E. Ganti Link Utama pada Grid tertentu
     async function gantiLinkUtama(gridId, oldTarget, gridNumber) {
-      const newTarget = prompt(`[Grid #${gridNumber}] Masukkan Link Utama baru:`, oldTarget);
-      if (newTarget === null || newTarget.trim() === "") return;
-
-      const { error } = await supabase
-        .from('grids')
-        .update({ target_url: newTarget })
-        .eq('id', gridId);
-
-      if (error) {
-        showToast('Gagal mengganti link utama!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Link Utama Grid #${gridNumber} berhasil diganti!`, 'fa-circle-check');
-        loadGrids();
-      }
+      const newTarget = prompt(`[Grid #${gridNumber}] Link Utama baru:`, oldTarget);
+      if (!newTarget) return;
+      await supabase.from('grids').update({ target_url: newTarget }).eq('id', gridId);
+      showToast(`Link Utama Grid #${gridNumber} diganti!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // F. Delete Grid pada nomor tertentu
     async function deleteGrid(gridId, gridNumber) {
-      if (!confirm(`Yakin ingin menghapus seluruh data pada Grid #${gridNumber}?`)) return;
-
-      const { error } = await supabase
-        .from('grids')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        showToast('Gagal menghapus grid!', 'fa-triangle-exclamation');
-      } else {
-        showToast(`Grid #${gridNumber} berhasil dihapus!`, 'fa-circle-check');
-        loadGrids();
-      }
+      if (!confirm(`Hapus Grid #${gridNumber}?`)) return;
+      await supabase.from('grids').delete().eq('id', gridId);
+      showToast(`Grid #${gridNumber} berhasil dihapus!`, 'fa-circle-check');
+      loadGrids();
     }
 
-    // TOAST SYSTEM
     function showToast(message, iconClass = 'fa-circle-info') {
       const toast = document.createElement('div');
       toast.className = 'toast';
-      toast.innerHTML = `
-        <i class="fa-solid ${iconClass}"></i>
-        <span>${message}</span>
-      `;
-
+      toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
       toastContainer.appendChild(toast);
-
       setTimeout(() => {
         toast.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
+        setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
 
-    // HELPER
     function escapeHtml(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    // INITIAL LOAD
-    document.addEventListener('DOMContentLoaded', loadGrids);
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAdminSession();
+      loadGrids();
+    });
   </script>
 </body>
 </html>
